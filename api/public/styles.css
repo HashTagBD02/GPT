@@ -1,0 +1,12 @@
+:root{--bg:#0f172a;--fg:#e2e8f0;--muted:#94a3b8;--accent:#22c55e;--card:#111827;--border:#1f2937}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+.container{max-width:960px;margin:0 auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+h1{font-size:24px;margin:0}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+input,select,button{padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:#0b1220;color:var(--fg)}
+button{cursor:pointer;background:var(--accent);border:none;color:#052e13;font-weight:700}
+.offer{display:flex;align-items:center;justify-content:space-between;background:#0b1220;border:1px solid var(--border);padding:12px;border-radius:10px;margin:8px 0}
+.hidden{display:none}
+footer{color:var(--muted);text-align:center;margin-top:24px}

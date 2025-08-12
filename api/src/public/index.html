@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rewards MVP</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Rewards MVP</h1>
+      <div id="auth-status"></div>
+    </header>
+
+    <section id="auth">
+      <h2>Sign up / Login</h2>
+      <div class="row">
+        <input id="email" type="email" placeholder="email" />
+        <input id="password" type="password" placeholder="password (min 8)" />
+        <input id="displayName" type="text" placeholder="display name" />
+      </div>
+      <div class="row">
+        <button id="registerBtn">Register</button>
+        <button id="loginBtn">Login</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </section>
+
+    <section id="profile" class="hidden">
+      <h2>Profile</h2>
+      <pre id="profileData"></pre>
+    </section>
+
+    <section id="offers">
+      <h2>Offers</h2>
+      <div id="offersList"></div>
+    </section>
+
+    <section id="wallet" class="hidden">
+      <h2>Wallet</h2>
+      <div class="row">
+        <span>Balance:</span>
+        <strong id="balance">0</strong> coins
+      </div>
+      <h3>Request Payout</h3>
+      <div class="row">
+        <select id="payoutMethod">
+          <option value="PAYPAL">PayPal</option>
+          <option value="CRYPTO">Crypto</option>
+          <option value="GIFTCARD">Gift Card</option>
+        </select>
+        <input id="payoutCoins" type="number" min="1000" step="100" value="1000" />
+        <button id="requestPayoutBtn">Request</button>
+      </div>
+      <h3>Ledger (last 200)</h3>
+      <pre id="ledger"></pre>
+    </section>
+
+    <footer>
+      <p>Demo MVP — API at <code>/</code>. Do not use in production.</p>
+    </footer>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
