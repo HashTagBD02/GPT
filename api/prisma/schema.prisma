@@ -1,0 +1,208 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  hashedPassword   String
+  displayName      String
+  countryCode      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  riskScore        Int       @default(0)
+  kycStatus        KycStatus @default(NOT_REQUIRED)
+
+  devices          Device[]
+  wallet           Wallet?
+  referralsMade    Referral[] @relation("UserReferralsMade")
+  referralsReceived Referral[] @relation("UserReferralsReceived")
+  referredById     String?
+
+  conversions      Conversion[]
+  ledgerEntries    LedgerEntry[]
+  payoutRequests   PayoutRequest[]
+  riskEvents       RiskEvent[]
+}
+
+model Device {
+  id               String   @id @default(cuid())
+  user             User     @relation(fields: [userId], references: [id])
+  userId           String
+  fingerprintHash  String
+  userAgent        String
+  firstIp          String
+  lastIp           String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+  @@unique([fingerprintHash, userId])
+}
+
+model Wallet {
+  id           String  @id @default(cuid())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String  @unique
+  coinBalance  Int     @default(0)
+  updatedAt    DateTime @updatedAt
+}
+
+model Offer {
+  id                String   @id @default(cuid())
+  provider          String
+  externalOfferId   String
+  title             String
+  description       String?
+  geo               String?
+  device            String?
+  epcCents          Int?
+  payoutCents       Int
+  status            OfferStatus @default(ACTIVE)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  conversions       Conversion[] @relation("OfferConversions")
+
+  @@index([provider, externalOfferId])
+}
+
+model Conversion {
+  id              String        @id @default(cuid())
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String
+  offer           Offer?        @relation("OfferConversions", fields: [offerId], references: [id])
+  offerId         String?
+  provider        String
+  clickId         String
+  status          ConversionStatus @default(PENDING)
+  payoutCents     Int             @default(0)
+  txId            String
+  signature       String?
+  idempotencyKey  String         @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([provider, txId])
+}
+
+model LedgerEntry {
+  id            String      @id @default(cuid())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+  type          LedgerType
+  amountCoins   Int
+  usdCents      Int
+  refId         String?
+  metadataJson  Json?
+  createdAt     DateTime    @default(now())
+
+  @@index([userId])
+}
+
+model PayoutRequest {
+  id             String       @id @default(cuid())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  method         PayoutMethod
+  amountCoins    Int
+  usdCents       Int
+  status         PayoutStatus @default(PENDING)
+  reviewFlags    String?
+  processorTxnId String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([userId])
+}
+
+model Referral {
+  id               String  @id @default(cuid())
+  referrer         User    @relation("UserReferralsMade", fields: [referrerUserId], references: [id])
+  referrerUserId   String
+  referred         User    @relation("UserReferralsReceived", fields: [referredUserId], references: [id])
+  referredUserId   String  @unique
+  createdAt        DateTime @default(now())
+}
+
+model PromoCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        PromoType
+  rulesJson   Json?
+  usageLimit  Int?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model RiskEvent {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  eventType   String
+  scoreDelta  Int      @default(0)
+  detailsJson Json?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+enum OfferStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ConversionStatus {
+  PENDING
+  CREDITED
+  REVERSED
+}
+
+enum LedgerType {
+  CREDIT
+  DEBIT
+  REVERSAL
+  BONUS
+  REFERRAL
+}
+
+enum PayoutMethod {
+  PAYPAL
+  CRYPTO
+  GIFTCARD
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+enum PromoType {
+  FIXED
+  PERCENT
+  MULTIPLIER
+}
+
+enum KycStatus {
+  NOT_REQUIRED
+  REQUIRED
+  PENDING
+  VERIFIED
+  REJECTED
+}
