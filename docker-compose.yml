@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./docker/php
+    container_name: cpa-app
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      - APP_ENV=local
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - cpa
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    container_name: cpa-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - app
+    networks:
+      - cpa
+
+  mysql:
+    build:
+      context: ./docker/mysql
+    container_name: cpa-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cpa
+      MYSQL_USER: cpa
+      MYSQL_PASSWORD: cpa
+    ports:
+      - "33060:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - cpa
+
+  redis:
+    build:
+      context: ./docker/redis
+    container_name: cpa-redis
+    ports:
+      - "63790:6379"
+    networks:
+      - cpa
+
+  mailpit:
+    build:
+      context: ./docker/mailpit
+    container_name: cpa-mailpit
+    ports:
+      - "8025:8025"
+    networks:
+      - cpa
+
+  horizon:
+    build:
+      context: ./docker/horizon
+    container_name: cpa-horizon
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - app
+      - redis
+    networks:
+      - cpa
+
+  frontend:
+    image: node:20-alpine
+    container_name: cpa-frontend
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    networks:
+      - cpa
+
+volumes:
+  mysql-data:
+
+networks:
+  cpa:
+    driver: bridge
+
